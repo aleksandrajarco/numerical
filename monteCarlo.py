@@ -17,9 +17,7 @@ def argp():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
    
     parser.add_argument("-x", dest="xrange", required=True, help="boundary of integration range", type=float, action='append')
-    #parser.add_argument("-xb", dest="xb", required=True, help="right boundary of integration range", type=float)
     parser.add_argument("-y", dest="yrange", required=True, help="minimum and maximum of function in [xa,xb] range", type=float, action='append')
-    #parser.add_argument("-yb", dest="yb", required=True, help="maximum of function in [xa,xb] range", type=float)
     parser.add_argument("-n", dest="nsteps", required=False, help="number of steps", type=int, default=50000)
     parser.add_argument("-s", dest="steps", required=False, help="step size", type=int, default=1000)
 
