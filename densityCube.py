@@ -195,7 +195,7 @@ class DensityCube(object):
 
     def write_coords_and_density(self, output_file='density_coords.csv'):
 
-        with open('output_file.csv', 'w') as f:
+        with open(output_file, 'w') as f:
             f.write("density,x,y,z\n")  # Write headers to the file
 
             # Generate a grid of coordinates using meshgrid
