@@ -98,71 +98,92 @@ class DensityCube(object):
         print(f"yVoxel Info: {self.yVoxel}")
         print(f"zVoxel Info: {self.zVoxel}")
 
-    def d2f_dz2(self, z, y, x):  # 1
-        if z < self.xVoxel - 1 and z > 0:
-            return (((a[z + 1][y][x]) - 2 * float(a[z][y][x]) + (a[z - 1][y][x])) / (self.delta_z * self.delta_z))
+    # First derivative with respect to x
+    def dfdx(self, z, y, x):
+        if x < self.zVoxel - 1:
+            return (self.grid_data[z, y, x + 1] - self.grid_data[z, y, x]) / self.xVoxelWidth
         else:
             return None
 
-    def d2f_dy2(self, z, y, x, delta_y):  # 2
-        if y < self.zVoxel - 1 and y > 0:
-            return (((a[z][y + 1][x]) - 2 * float(a[z][y][x]) + (a[z][y - 1][x])) / (self.delta_y * self.delta_y))
+    # First derivative with respect to y
+    def dfdy(self, z, y, x):
+        if y < self.yVoxel - 1:
+            return (self.grid_data[z, y + 1, x] - self.grid_data[z, y, x]) / self.yVoxelWidth
         else:
             return None
 
-    def d2f_dx2(self, z, y, x):  # 3
+    # First derivative with respect to z
+    def dfdz(self, z, y, x):
+        if z < self.xVoxel - 1:
+            return (self.grid_data[z + 1, y, x] - self.grid_data[z, y, x]) / self.zVoxelWidth
+        else:
+            return None
+
+    # Second derivative with respect to x (d^2f/dx^2)
+    def d2f_dx2(self, z, y, x):
         if x < self.zVoxel - 1 and x > 0:
-            return ((a[z][y][x + 1] - 2 * float(a[z][y][x]) + (a[z][y][x - 1])) / (self.delta_x * self.delta_x))
+            return ((self.grid_data[z, y, x + 1] - 2 * self.grid_data[z, y, x] + self.grid_data[
+                        z, y, x - 1]) / (self.xVoxelWidth ** 2))
         else:
             return None
 
-    def d2f_dzdy(self, z, y, x):  # 4
-        if y < self.zVoxel - 1 and y > 0 and z < self.xVoxel - 1 and z > 0:
-            return ((a[z + 1][y + 1][x] - float(a[z + 1][y - 1][x]) - float(a[z - 1][y + 1][x]) + float(
-                a[z - 1][y - 1][x])) / (4 * self.delta_z * self.delta_y))
+    # Second derivative with respect to y (d^2f/dy^2)
+    def d2f_dy2(self, z, y, x):
+        if y < self.yVoxel - 1 and y > 0:
+            return ((self.grid_data[z, y + 1, x] - 2 * self.grid_data[z, y, x] + self.grid_data[
+                        z, y - 1, x]) / (self.yVoxelWidth ** 2))
         else:
             return None
 
-    def d2f_dzdx(self, z, y, x):  # 5
-        if x < self.yVoxel - 1 and x > 0 and z < self.xVoxel - 1 and z > 0:
-            return (((a[z + 1][y][x + 1] - float(a[z + 1][y][x - 1]) - float(a[z - 1][y][x + 1]) + float(
-                a[z - 1][y][x + 1])) / (4 * self.delta_z * self.delta_y)))
+    # Second derivative with respect to z (d^2f/dz^2)
+    def d2f_dz2(self, z, y, x):
+        if z < self.xVoxel - 1 and z > 0:
+            return ((self.grid_data[z + 1, y, x] - 2 * self.grid_data[z, y, x] + self.grid_data[
+                        z - 1, y, x]) / (self.zVoxelWidth ** 2))
         else:
             return None
 
-    def d2f_dydx(self, z, y, x):  # 6
-        if y < self.zVoxel - 1 and y > 0 and x < self.zVoxel - 1 and x > 0:
-            return (((a[z][y + 1][x + 1] - float(a[z][y + 1][x - 1]) - float(a[z][y - 1][x + 1]) + float(
-                a[z][y - 1][x + 1])) / (4 * self.delta_y * self.delta_x)))
+    #Mixed second derivative with respect to x and y (d ^ 2f / dxdy)
+    def d2f_dxdy(self, z, y, x):
+        if x < self.zVoxel - 1 and y < self.yVoxel - 1:
+            return (self.grid_data[z, y + 1, x + 1] - self.grid_data[z, y - 1, x + 1] - self.grid_data[
+                z, y + 1, x - 1] + self.grid_data[z, y - 1, x - 1]) / (2 * self.xVoxelWidth * self.yVoxelWidth)
         else:
             return None
 
-    def d2f_dydz(self, z, y, x):  # 7
-        if y < self.zVoxel - 1 and y > 0 and z < self.xVoxel - 1 and z > 0:
-            return (((a[z + 1][y + 1][x] - float(a[z - 1][y + 1][x]) - float(a[z + 1][y - 1][x]) + float(
-                a[z + 1][y - 1][x])) / (4 * self.delta_y * self.delta_z)))
+    # Mixed second derivative with respect to x and z (d^2f/dxdz)
+    def d2f_dxdz(self, z, y, x):
+        if x < self.zVoxel - 1 and z < self.xVoxel - 1:
+            return (self.grid_data[z + 1, y, x + 1] - self.grid_data[z - 1, y, x + 1] - self.grid_data[
+                z + 1, y, x - 1] + self.grid_data[z - 1, y, x - 1]) / (2 * self.xVoxelWidth * self.zVoxelWidth)
         else:
             return None
 
-    def d2f_dxdz(self, z, y, x):  # 8
-        if x < self.yVxel - 1 and x > 0 and z < self.xVoxel - 1 and z > 0:
-            return (((a[z + 1][y][x + 1] - float(a[z - 1][y][x + 1]) - float(a[z + 1][y][x - 1]) + float(
-                a[z + 1][y][x - 1])) / (4 * self.delta_x * self.delta_z)))
+    # Mixed second derivative with respect to y and z (d^2f/dydz)
+    def d2f_dydz(self, z, y, x):
+        if y < self.yVoxel - 1 and z < self.xVoxel - 1:
+            return (self.grid_data[z + 1, y + 1, x] - self.grid_data[z - 1, y + 1, x] - self.grid_data[
+                z + 1, y - 1, x] + self.grid_data[z - 1, y - 1, x]) / (2 * self.yVoxelWidth * self.zVoxelWidth)
         else:
             return None
-
-    def d2f_dxdy(self, z, y, x):  # 9
-        if x < self.yVoxel - 1 and x > 0 and y < self.zVoxel - 1 and y > 0:
-            return ((a[z][y + 1][x + 1] - float(a[z][y - 1][x + 1]) - float(a[z][y - 1][x - 1]) + float(
-                a[z][y - 1][x - 1])) / (4 * self.delta_x * self.delta_y))
-        else:
-            return None
-        
     def hessian(self, z, y, x):
         '''Calculate the Hessian matrix at a given point.'''
-        return (self.d2f_dx2(z, y, x), self.d2f_dxdy(z, y, x), self.d2f_dzdx(z, y, x),
-                self.d2f_dxdy(z, y, x), self.d2f_dy2(z, y, x), self.d2f_dzdy(z, y, x),
-                self.d2f_dxdz(z, y, x), self.d2f_dydz(z, y, x), self.d2f_dz2(z, y, x))
+        # Second-order derivatives in each direction
+        d2f_dx2 = self.d2f_dx2(z, y, x)
+        d2f_dy2 = self.d2f_dy2(z, y, x)
+        d2f_dz2 = self.d2f_dz2(z, y, x)
+
+        # Mixed partial derivatives
+        d2f_dxdy = self.d2f_dxdy(z, y, x)
+        d2f_dxdz = self.d2f_dxdz(z, y, x)
+        d2f_dydz = self.d2f_dydz(z, y, x)
+
+        # Constructing the Hessian matrix
+        hessian_matrix = np.array([[d2f_dx2, d2f_dxdy, d2f_dxdz],
+                                  [d2f_dxdy, d2f_dy2, d2f_dydz],
+                                  [d2f_dxdz, d2f_dydz, d2f_dz2]])
+
+        return hessian_matrix
 
     def write_coords_and_density(self, output_file='density_coords.csv'):
 
@@ -208,7 +229,7 @@ if __name__ == "__main__":
     args = parse_arguments()
     cube = DensityCube(args.cube_file, args.d_range)
     #print(cube.header)
-   # cube.write_coords_and_density()
-    cube.integrate_density()
+    #cube.write_coords_and_density()
+    #cube.integrate_density()
 
 
