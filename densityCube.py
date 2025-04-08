@@ -14,9 +14,6 @@ Script reads Gaussian cube file (cubefile.txt) and performs the following tasks:
 import argparse
 
 import numpy as np
-from numpy import array
-import sys
-import re
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Process Gaussian cube file")
@@ -33,7 +30,6 @@ class DensityCube(object):
         self.cube_file_path = cube_file_path
         self.d_range = d_range
         self.grid_data = []
-        self.atom_info = []
         self.grid_shape = []
         self.header = []
         self.title = ""
@@ -186,7 +182,6 @@ class DensityCube(object):
 
         # Flatten the indices and grid data for vectorized processing
         x, y, z = x.flatten(), y.flatten(), z.flatten()
-        grid_data = self.grid_data.flatten()
 
         # Compute Hessian matrices for all points in parallel
         hessians = np.array([self.calculate_hessian(x_i, y_i, z_i) for x_i, y_i, z_i  in zip(x, y, z)])
@@ -228,9 +223,6 @@ if __name__ == "__main__":
     '''Main function to execute the Cube file processing'''
     args = parse_arguments()
     cube = DensityCube(args.cube_file, args.d_range)
-    #print(cube.header)
-    #cube.write_coords_and_density()
-    #cube.integrate_density()
     cube.calculate_hessian_for_all_points()
 
 
