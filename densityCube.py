@@ -58,10 +58,6 @@ class DensityCube(object):
 
         self.grid_data = np.array(self.grid_data)  # Convert to NumPy array
 
-        """for line in lines:
-                self.grid_data.extend([float(val) for val in line.split()]) """
-
-
     def _parse_header(self):
         '''Parses the header section of the cube file.'''
         # Parse the title lines
@@ -93,8 +89,6 @@ class DensityCube(object):
         # Output parsed information for verification (optional)
         print(f"Title: {self.title}")
         print(f"Atom Info: {self.atom_count}, ({self.atom_x_origin}, {self.atom_y_origin}, {self.atom_z_origin})")
-        print(f"xVoxel Info: {self.xVoxel}")
-        print(f"self.xVoxelWidth: {self.xVoxelWidth}")
         print(f"yVoxel Info: {self.yVoxel}")
         print(f"zVoxel Info: {self.zVoxel}")
 
@@ -166,7 +160,7 @@ class DensityCube(object):
                 z + 1, y - 1, x] + self.grid_data[z - 1, y - 1, x]) / (2 * self.yVoxelWidth * self.zVoxelWidth)
         else:
             return None
-    def hessian(self, z, y, x):
+    def calculate_hessian(self, z, y, x):
         '''Calculate the Hessian matrix at a given point.'''
         # Second-order derivatives in each direction
         d2f_dx2 = self.d2f_dx2(z, y, x)
@@ -185,25 +179,36 @@ class DensityCube(object):
 
         return hessian_matrix
 
+    def calculate_hessian_for_all_points(self):
+        """Calculate Hessian for all points in the grid using numpy."""
+        # Create grid indices
+        x, y, z = np.indices(self.grid_shape)  # Generate 3D grid of indices
+
+        # Flatten the indices and grid data for vectorized processing
+        x, y, z = x.flatten(), y.flatten(), z.flatten()
+        grid_data = self.grid_data.flatten()
+
+        # Compute Hessian matrices for all points in parallel
+        hessians = np.array([self.calculate_hessian(x_i, y_i, z_i) for x_i, y_i, z_i  in zip(x, y, z)])
+
+        return hessians
+
     def write_coords_and_density(self, output_file='density_coords.csv'):
 
         with open('output_file.csv', 'w') as f:
             f.write("density,x,y,z\n")  # Write headers to the file
 
-            # Iterate over the grid dimensions and calculate the coordinates
-            for z in range(int(self.zVoxel)):
-                for y in range(int(self.yVoxel)):
-                    for x in range(int(self.xVoxel)):
-                        # Calculate the 3D coordinates based on the voxel information
-                        coord_x = self.atom_x_origin + self.xVoxelWidth * x
-                        coord_y = self.atom_y_origin + self.yVoxelWidth * y
-                        coord_z = self.atom_z_origin + self.zVoxelWidth * z
+            # Generate a grid of coordinates using meshgrid
+            x_coords = self.atom_x_origin + self.xVoxelWidth * np.arange(self.xVoxel)
+            y_coords = self.atom_y_origin + self.yVoxelWidth * np.arange(self.yVoxel)
+            z_coords = self.atom_z_origin + self.zVoxelWidth * np.arange(self.zVoxel)
 
-                        # Extract the density value at (z, y, x)
-                        density = self.grid_data[x,y,z]
+            # Use np.meshgrid to create a grid of coordinates for all x, y, z
+            X, Y, Z = np.meshgrid(x_coords, y_coords, z_coords)
 
-                        # Write the density and the coordinates (x, y, z) to the file
-                        f.write(f"{density}, {coord_x}, {coord_y}, {coord_z}\n")
+            # Flatten the grid to iterate over all points
+            for x, y, z, density in zip(X.flatten(), Y.flatten(), Z.flatten(), self.grid_data.flatten()):
+                f.write(f"{density},{x},{y},{z}\n")
 
     def integrate_density(self):
         '''Integrate the electron density over the cube grid.'''
@@ -212,14 +217,9 @@ class DensityCube(object):
         # Calculate the volume of a single voxel (assuming orthogonal axes)
         voxel_volume = self.xVoxelWidth * self.yVoxelWidth * self.zVoxelWidth
         print(f"voxel_width:{self.yVoxelWidth}")
-        for x in range(self.xVoxel):
-            for y in range(self.yVoxel):
-                for z in range(self.zVoxel):
-                    density = self.grid_data[x, y, z]
 
-                    # Check if the density value is within the specified range
-                    if self.d_range[0] <= density <= self.d_range[1]:
-                        total_density += density * voxel_volume
+        mask = (self.grid_data >= self.d_range[0]) & (self.grid_data <= self.d_range[1])
+        total_density = np.sum(self.grid_data[mask]) * voxel_volume
 
         print(f"Integrated electron density (number of electrons): {total_density}")
 
@@ -231,5 +231,6 @@ if __name__ == "__main__":
     #print(cube.header)
     #cube.write_coords_and_density()
     #cube.integrate_density()
+    cube.calculate_hessian_for_all_points()
 
 
