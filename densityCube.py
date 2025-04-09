@@ -10,7 +10,8 @@ Script reads Gaussian cube file (cubefile.txt) and performs the following tasks:
 4) Evaluates eigenvalues of Hessian matrices for each point in the cube file.
 5) Finds the approximate positions of atoms by analyzing the electronic density distributions (stationary points, local maxima of electron density).
 '''
-
+# TODO: generate plots
+# TODO: use pandas
 import argparse
 
 import numpy as np
