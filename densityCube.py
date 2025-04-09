@@ -217,7 +217,7 @@ class DensityCube(object):
         total_density = np.sum(self.grid_data[mask]) * voxel_volume
 
         print(f"Integrated electron density (number of electrons): {total_density}")
-
+        return total_density
 
 if __name__ == "__main__":
     '''Main function to execute the Cube file processing'''
