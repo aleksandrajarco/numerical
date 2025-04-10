@@ -10,92 +10,78 @@ import argparse
 from random import uniform
 import os
 import tempfile
+import matplotlib.pyplot as plt
 
 
-def argp():
-    ''' parse arguments given by user in command line'''
+def parse_args():
+    """Parse arguments from command line."""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-   
-    parser.add_argument("-x", dest="xrange", required=True, help="boundary of integration range", type=float, action='append')
-    parser.add_argument("-y", dest="yrange", required=True, help="minimum and maximum of function in [xa,xb] range", type=float, action='append')
+    parser.add_argument("-x", dest="xrange", required=True, help="boundary of integration range", type=float, nargs=2)
+    parser.add_argument("-y", dest="yrange", required=True, help="minimum and maximum of function in [xa, xb] range", type=float, nargs=2)
     parser.add_argument("-n", dest="nsteps", required=False, help="number of steps", type=int, default=50000)
-    parser.add_argument("-s", dest="steps", required=False, help="step size", type=int, default=1000)
+    parser.add_argument("-s", dest="stepsize", required=False, help="step size", type=int, default=1000)
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
-def function(x):
-        
-    return cos(x)
 
 class MonteCarlo():
     def __init__(self):
-        #self.dataFile=open()
-        self.dataFile=tempfile.NamedTemporaryFile(delete=False)
-        self.PlotInput=tempfile.NamedTemporaryFile(delete=False)
+        self.dataFile=tempfile.NamedTemporaryFile(delete=False, mode='w')
+        self.PlotInput=tempfile.NamedTemporaryFile(delete=False, mode='w')
 
-    def createPlot(self): #argument as a string
-        
-        
-        #OpenInput=PlotInput
-        #print PlotInput.name
-        #OpenInput=open(PlotInput,'w')
-        command=""" set term postscript eps
-        set title "Monte Carlo intergration"
-        set output "MCIntegration.ps"
-        plot "{0}" using 1:2 with lines""".format(self.dataFile.name)
-        
-        execute ="gnuplot {0}".format(self.PlotInput.name)
-        
-        self.PlotInput.write(command)
-        self.PlotInput.close()
-        self.dataFile.close()
-        
-        #self.PlotInput.close()
-        os.system(execute)
-        #return execute
-    
-    
-    def monteCarloIntegration(self):
-       
-        #read arguments from command line
-        args=argp()
-        
-        nsteps=args.nsteps
-        steps=args.steps
-        x1=args.xrange[0]
-        x2=args.xrange[1]
-        ymin=args.yrange[0]
-        ymax=args.yrange[1]
-        
-        for n in range(steps,nsteps,steps):
-            p=0.0
+    def create_plot(self):
+        """Generate plot using matplotlib."""
+        # Read the data from the temporary data file
+        x_vals = []
+        y_vals = []
+        with open(self.dataFile.name, 'r') as file:
+            for line in file:
+                n, integral = map(float, line.strip().split())
+                x_vals.append(n)
+                y_vals.append(integral)
+
+        # Create the plot
+        plt.figure(figsize=(10, 6))
+        plt.plot(x_vals, y_vals, label="Monte Carlo Integration", color='blue', linestyle='-', marker='o')
+        plt.xlabel("Number of Steps (n)")
+        plt.ylabel("Integral Value")
+        plt.title("Monte Carlo Integration")
+        plt.legend()
+        plt.grid(True)
+
+        # Save the plot to a file
+        plt.savefig("MCIntegration.png")  # Save as PNG
+        plt.close()  # Close the plot
+
+    def monte_carlo_integration(self, args):
+        """Perform Monte Carlo integration based on user input."""
+        nsteps = args.nsteps
+        stepsize = args.stepsize
+        x1, x2 = args.xrange
+        ymin, ymax = args.yrange
+
+        for n in range(stepsize, nsteps, stepsize):
+            p = 0.0
             for i in range(n):
-                x=uniform(x1,x2)
-                y=uniform(ymin,ymax)
-                #print x,function(x),y
-                if abs(function(x))>=abs(y):
-                    p+=1
-                #print p    
-            r=p/n
-            #print ymax-ymin,x2-x1,r
-            #print r
-            integral= r*(x2-x1)*(ymax-ymin)
-        
-            self.dataFile.write("{0} {1}\n".format(n,integral))
-           
-    
-    def apply(self):
-        
-        self.monteCarloIntegration()
-        self.createPlot()
+                x = uniform(x1, x2)
+                y = uniform(ymin, ymax)
+                if abs(cos(x)) >= abs(y):
+                    p += 1
+            r = p / n
+            integral = r * (x2 - x1) * (ymax - ymin)
+            self.dataFile.write(f"{n} {integral}\n")
+            self.dataFile.flush()  # Ensure the data is written to the file
+        self.dataFile.close()
+
+    def apply(self, args):
+        """Run Monte Carlo integration and plot results."""
+        self.monte_carlo_integration(args)
+        self.create_plot()
         os.unlink(self.PlotInput.name)
         os.unlink(self.dataFile.name)
-        #os.system(self.createPlot())
 
-    
-    
 if __name__ == '__main__':
-    MC=MonteCarlo()
-    MC.apply()
+    args = parse_args()
+    MC = MonteCarlo()
+    MC.apply(args)
     
