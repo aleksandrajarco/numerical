@@ -83,15 +83,15 @@ class MonteCarlo:
         data_file (tempfile.NamedTemporaryFile): Temporary file to store Monte Carlo integration results.
     """
 
-    def __init__(self):
+    def __init__(self, args=None):
         """
         Initialize the MonteCarlo class by parsing command-line arguments
         and creating a temporary file to store results.
         """
-        self.args: argparse.Namespace = parse_args()
+        self.args = args if args is not None else parse_args()
         self.data_file: tempfile.NamedTemporaryFile = tempfile.NamedTemporaryFile(delete=False, mode='w')
 
-    def monte_carlo_integration(self, args: argparse.Namespace) -> str:
+    def monte_carlo_integration(self) -> str:
         """
         Perform Monte Carlo integration based on user input and save results to a file.
 
@@ -101,10 +101,10 @@ class MonteCarlo:
         Returns:
             str: The name of the file where the Monte Carlo integration results are stored.
         """
-        nsteps: int = args.nsteps
-        stepsize: int = args.stepsize
-        x1, x2 = args.xrange
-        ymin, ymax = args.yrange
+        nsteps: int = self.args.nsteps
+        stepsize: int = self.args.stepsize
+        x1, x2 = self.args.xrange
+        ymin, ymax = self.args.yrange
 
         with self.data_file:
             for n in range(stepsize, nsteps, stepsize):  # Iterate through steps
@@ -124,5 +124,5 @@ class MonteCarlo:
 if __name__ == '__main__':
     args = parse_args()  # Parse command-line arguments
     MC = MonteCarlo()  # Create an instance of MonteCarlo
-    MC.monte_carlo_integration(MC.args)  # Perform Monte Carlo integration
+    MC.monte_carlo_integration()  # Perform Monte Carlo integration
     plot_results(MC.data_file.name, 'integrationResultPlot.png')  # Generate the plot
