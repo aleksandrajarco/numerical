@@ -42,12 +42,12 @@
 
    -For Unix/macOS:
    ```bash
-   	source venv/bin/activate
+   source venv/bin/activate
    ```	
    	
    -For Windows:
    ```bash
-   	venv\Scripts\activate
+   venv\Scripts\activate
    ```
 4. Install required dependencies:
 	```bash
