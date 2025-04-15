@@ -9,6 +9,23 @@
 - Integrate density over the grid
 - Unit tests to verify functionality
 
+### MonteCarlo
+`MonteCarlo` provides functionality to perform Monte Carlo integration simulations and visualize the results. It is a versatile tool for numerical computations requiring random sampling.
+
+#### Key features:
+- Perform Monte Carlo integration over a user-specified range and step size.
+- Save integration results to temporary files for quick analysis.
+- Generate and save plots of integration results to visualize convergence.
+- Fully tested with integration results verified through unit tests.
+
+#### Usage:
+1. **Command-line Execution:**
+   Execute Monte Carlo integration and generate a plot:
+   ```bash
+   python monteCarlo.py --xrange 0 1 --yrange 0 1 --nsteps 1000 --stepsize 100
+   ```
+
+
 ## Installation
 1. Clone the repository:
 ```bash
@@ -37,8 +54,14 @@
 	pip install -r requirements.txt
 	```
 ## Usage
+### Example for DensityCube
 ```bash
 cd example
 python example_script.py
-```	
+```
+
+### Example for MonteCarlo
+```bash
+python monteCarlo.py --xrange 0 1 --yrange 0 1 --nsteps 1000 --stepsize 100
+```
 
