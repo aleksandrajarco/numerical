@@ -9,7 +9,7 @@ from densityCube import DensityCube
 class TestDensityCube(unittest.TestCase):
     def setUp(self):
         # Create a simple fake cube file for testing
-        self.cube_content = ''' Title Line1
+        self.cube_content = """ Title Line1
         Title Line2
           1  0.0    0.0  0.0
           3    1.0    0.0  0.0
@@ -20,10 +20,12 @@ class TestDensityCube(unittest.TestCase):
          5.21439E-19  9.91787E-19  1.86997E-18  3.50034E-18  6.51351E-18  1.20601E-17
          2.22265E-17  4.07605E-17  7.43042E-17  1.34425E-16  2.40842E-16  4.26328E-16
          7.43817E-16  1.27610E-15  2.14822E-15  3.54184E-15  5.71005E-15  8.98933E-15
-         1.38043E-14  2.06590E-14  3.01094E-14'''
+         1.38043E-14  2.06590E-14  3.01094E-14"""
 
         # Create a temporary cube file
-        self.temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.cube')
+        self.temp_file = tempfile.NamedTemporaryFile(
+            delete=False, mode="w", suffix=".cube"
+        )
         self.temp_file.write(self.cube_content)
         self.temp_file.close()
 
@@ -63,8 +65,11 @@ class TestDensityCube(unittest.TestCase):
     def test_d2f_dx2(self):
         # At the center, it should compute correctly
         result = self.cube.d2f_dx2(1, 1, 1)
-        expected = (self.cube.grid_data[1, 1, 2] - 2 * self.cube.grid_data[1, 1, 1] +
-                    self.cube.grid_data[1, 1, 0])
+        expected = (
+            self.cube.grid_data[1, 1, 2]
+            - 2 * self.cube.grid_data[1, 1, 1]
+            + self.cube.grid_data[1, 1, 0]
+        )
         self.assertEqual(result, expected)
 
     def test_integrate_density(self):
@@ -87,5 +92,5 @@ class TestDensityCube(unittest.TestCase):
         os.unlink(self.temp_file.name)  # Delete the temp file after tests
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
