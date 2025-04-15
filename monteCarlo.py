@@ -1,8 +1,8 @@
-'''
+"""
 Created on Jan 18, 2014
 
 @author: ola
-'''
+"""
 
 from math import cos
 import argparse
@@ -24,12 +24,36 @@ def parse_args() -> argparse.Namespace:
             - nsteps (int): Total number of steps for Monte Carlo integration.
             - stepsize (int): Step size for iteration.
     """
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-x", dest="xrange", required=True, help="Boundary of integration range", type=float, nargs=2)
-    parser.add_argument("-y", dest="yrange", required=True,
-                        help="Minimum and maximum of the function in [xa, xb] range", type=float, nargs=2)
-    parser.add_argument("-n", dest="nsteps", required=False, help="Number of steps", type=int, default=50000)
-    parser.add_argument("-s", dest="stepsize", required=False, help="Step size", type=int, default=1000)
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "-x",
+        dest="xrange",
+        required=True,
+        help="Boundary of integration range",
+        type=float,
+        nargs=2,
+    )
+    parser.add_argument(
+        "-y",
+        dest="yrange",
+        required=True,
+        help="Minimum and maximum of the function in [xa, xb] range",
+        type=float,
+        nargs=2,
+    )
+    parser.add_argument(
+        "-n",
+        dest="nsteps",
+        required=False,
+        help="Number of steps",
+        type=int,
+        default=50000,
+    )
+    parser.add_argument(
+        "-s", dest="stepsize", required=False, help="Step size", type=int, default=1000
+    )
 
     args = parser.parse_args()
 
@@ -57,14 +81,21 @@ def plot_results(file_name: str, output_image: str = "MCIntegration.png") -> Non
     x_vals: List[float] = []
     y_vals: List[float] = []
 
-    with open(file_name, 'r') as file:
+    with open(file_name, "r") as file:
         for line in file:
             n, integral = map(float, line.strip().split())
             x_vals.append(n)
             y_vals.append(integral)
 
     plt.figure(figsize=(10, 6))
-    plt.plot(x_vals, y_vals, label="Monte Carlo Integration", color='blue', linestyle='-', marker='o')
+    plt.plot(
+        x_vals,
+        y_vals,
+        label="Monte Carlo Integration",
+        color="blue",
+        linestyle="-",
+        marker="o",
+    )
     plt.xlabel("Number of Steps (n)")
     plt.ylabel("Integral Value")
     plt.title("Monte Carlo Integration")
@@ -89,7 +120,9 @@ class MonteCarlo:
         and creating a temporary file to store results.
         """
         self.args = args if args is not None else parse_args()
-        self.data_file: tempfile.NamedTemporaryFile = tempfile.NamedTemporaryFile(delete=False, mode='w')
+        self.data_file: tempfile.NamedTemporaryFile = tempfile.NamedTemporaryFile(
+            delete=False, mode="w"
+        )
 
     def monte_carlo_integration(self) -> str:
         """
@@ -121,8 +154,8 @@ class MonteCarlo:
         return self.data_file.name
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = parse_args()  # Parse command-line arguments
     MC = MonteCarlo()  # Create an instance of MonteCarlo
     MC.monte_carlo_integration()  # Perform Monte Carlo integration
-    plot_results(MC.data_file.name, 'integrationResultPlot.png')  # Generate the plot
+    plot_results(MC.data_file.name, "integrationResultPlot.png")  # Generate the plot
