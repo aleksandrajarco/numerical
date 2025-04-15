@@ -11,7 +11,7 @@ import sys
 
 sys.modules["matplotlib.pyplot"] = __import__(
     "matplotlib.pyplot"
-)  # Avoid errors if matplotlib not in test env
+)  # Avoid errors if matplotlib not in tests env
 from monteCarlo import MonteCarlo, plot_results
 
 
@@ -51,12 +51,14 @@ class TestMonteCarlo(unittest.TestCase):
 
     def test_plot_results_plot_exists(self):
         plot_file = self.mc.monte_carlo_integration()
-        plot_results(plot_file, "integrationResultPlot.png")
-        self.assertTrue(os.path.exists("integrationResultPlot.png"))
+        output_image = "integrationResultPlot.png"
+        plot_results(plot_file, output_image)
+        self.assertTrue(os.path.exists(output_image))
         self.assertGreater(
-            os.path.getsize("integrationResultPlot.png"), 0, "Result file is empty"
+            os.path.getsize(output_image), 0, "Result file is empty"
         )
         os.remove(plot_file)
+        os.remove(output_image)
 
     def tearDown(self):
         pass
